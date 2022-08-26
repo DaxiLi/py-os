@@ -6,6 +6,7 @@ PSW_ERROR = 2
 PSW_END = 3
 PSW_SCHEDULE = 4
 PSW_CALL = 5
+PSW_NEXT = 6
 
 INSTRUMENTS = [
     'add',
@@ -173,7 +174,7 @@ class CPU:
 
     def end(self, ins):
         print('end')
-        self.interruptFunc(('END', ))
+        self.interruptFunc((PSW_END, ))
 
     def call(self, ins):
         print('call')
