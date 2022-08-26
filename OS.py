@@ -1,8 +1,5 @@
 import time
-import GUI
-import CPU
 import os
-import subprocess
 from CPU import PSW_IO, PSW_END, PSW_ERROR, PSW_NORMAL, PSW_SCHEDULE
 import PCB
 
@@ -58,10 +55,11 @@ class OS:
             print(detail)
         return
 
-
+    # 刷新当前进程的信息，最顶部那个 UI
     def refreshStatus(self, slise):
         self.UI.refreshCPU(self.cpu, self.currentPCB.pid, self.clk, slise)
 
+    # 刷新中间的，就绪和等待队列 UI
     def refreshUIList(self):
         list_val = []
         l = len(self.waitPCB)
@@ -77,6 +75,7 @@ class OS:
             list_val.extend(self.readPCB[l])
         self.UI.refreshList('R', list_val, self.clk)
 
+    # 加载可执行文件
     def loadExecuteFile(self, p, n, rank):
         print('load exec file ' + p)
         f = open(p, encoding='utf-8')
@@ -90,6 +89,7 @@ class OS:
         self.addProcessToReadyList(pcb, rank)
         return n + ' is running pid: ' + str(self.pid)
 
+    # 加载批处理文件
     def loadBatFile(self, p, n, rank):
         print('load bat file ' + p)
         f = open(p, encoding='utf-8')
@@ -109,6 +109,7 @@ class OS:
         self.refreshUIList()
         return retval
 
+    # 初始化 PCB List，清空，初始化即可
     def initPCBList(self):
         self.readPCB.clear()
         self.waitPCB.clear()
@@ -116,6 +117,7 @@ class OS:
             self.readPCB.append([])
             self.waitPCB.append([])
 
+    # 从 就绪列表中 ，根据优先级，从高到低，返回下一个 PCB
     def getNextProcessFromReadyList(self):
         l = len(self.readPCB)
         # print('l : ' + str(l))
@@ -131,6 +133,7 @@ class OS:
             self.PCBNUMS = self.PCBNUMS - 1
             return retval
 
+    # 将 PCB 重新加到就绪队列 尾部
     def addProcessToReadyList(self, pcb, rank=10):
         self.PCBNUMS = self.PCBNUMS + 1
         l = len(self.readPCB)
@@ -139,6 +142,7 @@ class OS:
                 self.readPCB.append([])
         self.readPCB[rank].append(pcb)
 
+    # 将 PCB 加到等待队列尾部
     def addProcessToWaitList(self, pcb, rank=10):
         self.PCBNUMS = self.waitPCBNUMS + 1
         # pcb.waitTime = 0
@@ -148,6 +152,9 @@ class OS:
                 self.waitPCB.append([])
         self.waitPCB[rank].append(pcb)
 
+    # 开机回调函数，开机时调用，做初始化工作，
+    # 主要初始化 就学队列
+    # 创建 idle 进程
     def powerOnInitFunc(self):
         print('init ready list')
         self.initPCBList()
@@ -157,9 +164,10 @@ class OS:
         self.currentPCB = self.getNextProcessFromReadyList()
         self.cpu.load(self.currentPCB)
         self.ready = True
-        # self.scheduePCB()
 
     # 处理 ui 的 command 回调
+    # 这个地方比较粗糙，也不想费神分离出来
+    # 处理 command ，并执行命令，返回 结果 字符串显示在底部控制台
     def commandCallBack(self, cmd):
         print('command Call Back')
         cmd = cmd.replace('  ', '').lower().split(' ')
@@ -207,22 +215,25 @@ class OS:
             return self.loadBatFile(p, cmd[0], arg)
         return "command not found"
 
-    def scheduePCB(self):
-        self.currentPCB = self.getNextProcessFromReadyList()
-        self.cpu.load(self.currentPCB)
-
+    # 时间片，执行一个时间片后返回
     def runSlise(self):
         global DEFAULT_SLISE
         global CLOCK_CIRCLE
         print(DEFAULT_SLISE)
         for t in range(0, DEFAULT_SLISE):
+            # 关机了就直接返回
             if self.UI.isPowerOn() is False:
                 return
+            # 总时钟 +1
             self.clk = self.clk + 1
+            # 当前进程 cpu 时间 +1
             self.cpu.cpuTime = self.cpu.cpuTime + 1
+            # 执行一条语句
             self.cpu.clock()
+            # 刷新 UI
             self.refreshUIList()
             self.refreshStatus(t + 1)
+            # 把 wait 队列中的 PCB ，等待时间 -1 ，减到0，移出等待队列
             for l in self.waitPCB:
                 for v in l:
                     if v.waitTime == 0:
@@ -231,7 +242,7 @@ class OS:
                         return
                     v.waitTime = v.waitTime - 1
                     v.allWaitTime = v.allWaitTime + 1
-            # # 有进程就绪，立刻让出 idle
+            # 有进程就绪，立刻让出 idle
             if self.cpu.pName == '1_IDLE' and self.PCBNUMS > 0:
                 break
             time.sleep(CLOCK_CIRCLE)
@@ -245,6 +256,5 @@ class OS:
             if self.ready is False:
                 time.sleep(CLOCK_CIRCLE)
                 continue
-            print('--')
             self.interupt((PSW_SCHEDULE, 'schedule'))
             self.runSlise()

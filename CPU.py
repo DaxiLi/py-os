@@ -25,7 +25,6 @@ REGISTERS = {
     'ra', 'rb', 'rx', 'psw', 'pc'
 }
 
-
 class CPU:
     PC = 0
     RA = 0

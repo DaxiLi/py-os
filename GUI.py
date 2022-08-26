@@ -1,13 +1,6 @@
-import base64
 
-import sys
-import time
 from tkinter import *
-import tkinter.messagebox
-from time import sleep
-import json
-import socket
-import threading
+
 
 import CPU
 
@@ -68,8 +61,6 @@ class DeskTop:
         print("init")
         self.mainFrame()
 
-    # def setCommanFun(self, fun):
-
     def isPowerOn(self):
         return self.Power
 
@@ -93,7 +84,6 @@ class DeskTop:
 
     def refreshList(self, list_name, list_value, clk):
         if list_name == 'R':
-            print('R')
             self.ListboxReadyPidList.delete(0, "end")
             self.ListboxReadyProcessNameList.delete(0, 'end')
             self.ListboxReadyWaitTimeList.delete(0, 'end')
@@ -108,7 +98,6 @@ class DeskTop:
                 self.ListboxReadyWaitAllTimeList.insert('end', clk - val.startTime)
                 self.ListboxReadyLevelList.insert('end', val.rank)
         elif list_name == 'W':
-            print("W")
             self.ListboxWaitPidList.delete(0, "end")
             self.ListboxWaitProcessNameList.delete(0, 'end')
             self.ListboxWaitWaitTimeList.delete(0, 'end')
@@ -158,7 +147,6 @@ class DeskTop:
     def topFrame(self):
         print("draw status Frame")
         self.topFrame = Frame(self.DeskTop, width=self.window_width, height=200)
-
 
         px = 5
         py = 10
