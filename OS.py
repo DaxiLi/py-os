@@ -213,49 +213,50 @@ class OS:
     # 处理 command ，并执行命令，返回 结果 字符串显示在底部控制台
     def commandCallBack(self, cmd):
         print('command Call Back')
-        cmd = cmd.replace('  ', '').lower().split(' ')
-        if len(cmd) < 1:
+        d_cmd = cmd.replace('  ', '').lower().split(' ')
+        if len(d_cmd) < 1:
             return "找不到该命令!"
-        if cmd[0] == 'ls':
-            for root, dirs, files in os.walk(self.pwd, topdown=False):
-                r = os.popen('dir')
+        if d_cmd[0] == 'ls':
+            r = os.popen('dir')
             return r.read()
-        if cmd[0] == 'cd':
-            if len(cmd) > 1:
-                self.pwd = os.path.join(self.pwd, cmd[1])
+        if d_cmd[0] == 'cd':
+            if len(d_cmd) > 1:
+                self.pwd = os.path.join(self.pwd, d_cmd[1])
                 return self.pwd
             else:
                 return '缺少必要参数'
-        if cmd[0] == 'pwd':
+        if d_cmd[0] == 'pwd':
             return self.pwd
-        if cmd[0] == 'cls':
+        if d_cmd[0] == 'cls':
             self.UI.clearTextTerminalArea()
             return
 
-        if cmd[0].endswith('.if'):
+        if d_cmd[0].endswith('.if'):
             arg = 10
-            if (len(cmd) > 1):
-                arg = cmd[1]
-            p = os.path.join(self.pwd, cmd[0])
+            if (len(d_cmd) > 1):
+                arg = d_cmd[1]
+            p = os.path.join(self.pwd, d_cmd[0])
             if os.path.exists(p):
-                return self.loadExecuteFile(p, cmd[0], arg)
-        if cmd[0].endswith('.ifs'):
+                return self.loadExecuteFile(p, d_cmd[0], arg)
+        if d_cmd[0].endswith('.ifs'):
             arg = 10
-            if (len(cmd) > 1):
-                arg = cmd[1]
-            p = os.path.join(self.pwd, cmd[0], arg)
+            if (len(d_cmd) > 1):
+                arg = d_cmd[1]
+            p = os.path.join(self.pwd, d_cmd[0], arg)
             if os.path.exists(p):
-                return self.loadBatFile(p, cmd[0], arg)
+                return self.loadBatFile(p, d_cmd[0], arg)
 
-        p = os.path.join(self.pwd, cmd[0] + '.if')
+        p = os.path.join(self.pwd, d_cmd[0] + '.if')
         arg = 10
-        if (len(cmd) > 1):
-            arg = cmd[1]
+        if (len(d_cmd) > 1):
+            arg = d_cmd[1]
         if os.path.exists(p):
-            return self.loadExecuteFile(p, cmd[0], arg)
-        p = os.path.join(self.pwd, cmd[0] + '.ifs')
+            return self.loadExecuteFile(p, d_cmd[0], arg)
+        p = os.path.join(self.pwd, d_cmd[0] + '.ifs')
         if os.path.exists(p):
-            return self.loadBatFile(p, cmd[0], arg)
+            return self.loadBatFile(p, d_cmd[0], arg)
+        r = os.popen(cmd)
+        return r.read()
         return "command not found"
 
     # 时间片，执行一个时间片后返回
