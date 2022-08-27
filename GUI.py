@@ -139,7 +139,7 @@ class DeskTop:
 
     def mainFrame(self):
         self.DeskTop.title("pyos")
-        self.DeskTop.geometry("1000x990")
+        self.DeskTop.geometry("1000x920")
         self.topFrame()
         self.midFrame()
         self.terminalBox()
@@ -201,7 +201,6 @@ class DeskTop:
         self.TextTimeClock.set('0')
         c = c + 1
 
-
         Label(left, text="已运行:").grid(column=c, row=r, padx=px, pady=py)
         Label(left, height=1, relief='raised', width=10, textvariable=self.TextCPUTime).grid(column=c, row=r + 1,
                                                                                                padx=px, pady=py)
@@ -228,8 +227,6 @@ class DeskTop:
 
         leftFrame = LabelFrame(self.midFrame, text="就绪队列", width=int(self.window_width / 2), height=400)
         leftFrame.pack(side=LEFT, padx=10)
-        # processFrame = LabelFrame(leftFrame, text='进程名', height=400, width=int(self.window_width/8))
-        # processFrame.pack(side=LEFT)
 
         l = LabelFrame(leftFrame, text='PID', height=400, width=int(self.window_width / 8))
         l.pack(side=LEFT)
@@ -295,18 +292,18 @@ class DeskTop:
         self.ListboxWaitCPUTimeList.pack(side=LEFT)
 
         self.midFrame.pack()
-
-    def listenerCommand(self, s):
-        if len(s.get()) < 2:
-            s.set('>>')
-            return
-        if s.get()[0] != '>':
-            s.set('>>' + s.get())
-        if s.get()[1] != '>':
-            s.set('>' + s.get())
-        if s.get()[len(s.get()) - 1] == "\n":
-            print('do ' + s.get())
-        print(s.get())
+    #
+    # def listenerCommand(self, s):
+    #     if len(s.get()) < 2:
+    #         s.set('>>')
+    #         return
+    #     if s.get()[0] != '>':
+    #         s.set('>>' + s.get())
+    #     if s.get()[1] != '>':
+    #         s.set('>' + s.get())
+    #     if s.get()[len(s.get()) - 1] == "\n":
+    #         print('do ' + s.get())
+    #     print(s.get())
 
     def clearTextTerminalArea(self):
         self.TextAreaTerminalBox['state'] = 'normal'
@@ -347,15 +344,16 @@ class DeskTop:
 
     def terminalWelCom(self):
         self.addTextToTerminalArea('''
-        Pyos simulate!
-        ____         ___  ____  
-        |  _ \ _   _ / _ \/ ___| 
-        | |_) | | | | | | \___ \ 
-        |  __/| |_| | |_| |___) |
-        |_|    \__, |\___/|____/ 
-               |___/             
-        please input command!
-        ''')
+Pyos simulate!
+____         ___  ____  
+|  _ \ _   _ / _ \/ ___| 
+| |_) | | | | | | \___ \ 
+|  __/| |_| | |_| |___) |
+|_|    \__, |\___/|____/ 
+       |___/             
+please input command!
+\n'''
+                                   )
 
     def show(self):
         print('show')

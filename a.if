@@ -1,8 +1,8 @@
 RA = 1
 RB = 3
 RX = 2
-IO 2
 INC RA
+IO 5
 INC RB
 INC RX
 SUB RA,RB

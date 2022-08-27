@@ -1,3 +1,4 @@
+import re
 import time
 import os
 from CPU import PSW_IO, PSW_END, PSW_ERROR, PSW_NORMAL, PSW_SCHEDULE, PSW_NEXT
@@ -34,11 +35,12 @@ class OS:
         if e == PSW_ERROR:
             self.UI.addTextToTerminalArea("ERROR: " + detail[1])
         elif e == PSW_END:
-            self.UI.addTextToTerminalArea("INFO: " + self.currentPCB.pName + " End!")
+            self.UI.addTextToTerminalArea("INFO: \t[ END ]      \t " + self.currentPCB.pName + " 运行结束!\n")
             self.interupt((PSW_NEXT,))
             return
         elif e == PSW_IO:
             print('----------------')
+            self.UI.addTextToTerminalArea("INFO: \t[ IO ]      \t pid/ " + str(self.currentPCB.pid) + "需耗时" + str(detail[1]) + "\n" )
             self.cpu.save(self.currentPCB)
             self.currentPCB.waitTime = int(detail[1])
             self.addProcessToWaitList(self.currentPCB, self.currentPCB.rank)
@@ -47,12 +49,15 @@ class OS:
         elif e == PSW_SCHEDULE:
             if self.getPCBNums() == 0:
                 return
+            self.UI.addTextToTerminalArea("INFO: \t[ SCHEDULE 1 ] \t 换出 -- pid/ " + str(self.currentPCB.pid) + "进程\n")
             self.cpu.save(self.currentPCB)
             self.addProcessToReadyList(self.currentPCB, self.currentPCB.rank)
             self.currentPCB = self.getNextProcessFromReadyList()
+            self.UI.addTextToTerminalArea("INFO: \t[ SCHEDULE 2 ] \t 换进 ++ pid/ " + str(self.currentPCB.pid) + "进程\n" )
             self.cpu.load(self.currentPCB)
             return
         elif e == PSW_NEXT:
+            self.UI.addTextToTerminalArea("INFO: \t[ SCHEDULE ] \t 切换进程 ** pid/ " + str(self.currentPCB.pid) + "\n" )
             self.currentPCB = self.getNextProcessFromReadyList()
             self.cpu.load(self.currentPCB)
             return
@@ -84,6 +89,11 @@ class OS:
     # 加载可执行文件
     def loadExecuteFile(self, p, n, rank):
         print('load exec file ' + p)
+        print("rank " + str(rank))
+        if re.match('^[0-9]*$', str(rank) ) is None:
+            rank = 10
+        else:
+            rank = int(rank)
         f = open(p, encoding='utf-8')
         d = f.read()
         f.close()
@@ -91,27 +101,35 @@ class OS:
         self.pid = self.pid + 1
         name = str(self.pid) + "_" + n
         ins = d.split('\n')
-        pcb = PCB.PCB(self.pid, name, 0, 0, 0, 0, 0, self.clk, 0, ins)
+        pcb = PCB.PCB(self.pid, name, 0, 0, 0, 0, 0, self.clk, 0, ins, rank)
         self.addProcessToReadyList(pcb, rank)
-        return n + ' is running pid: ' + str(self.pid)
+        return "INFO: \t[ CREATE ] \t" + n + ' is running pid: ' + str(self.pid)
 
     # 加载批处理文件
-    def loadBatFile(self, p, n, rank):
+    def loadBatFile(self, p, n, rank=10):
         print('load bat file ' + p)
+        print("rank " + str(rank))
+        if re.match('^[0-9]*$', str(rank)) is None:
+            rank = 10
+        else:
+            rank = int(rank)
         f = open(p, encoding='utf-8')
         d = f.read()
         f.close()
         ps = d.split('\n')
         retval = ''
-        for p in ps:
-            # print(p)
-            if p.endswith('.if'):
-                p1 = os.path.join(self.pwd, p)
+        for line in ps:
+            line = line.replace("  ", '').strip()
+            names = line.split(' ')
+            if len(names) == 2:
+                if re.match('^[0-9]*$', names[1]) is not None:
+                    rank = int(names[1])
+            if line.endswith('.if'):
+                p1 = os.path.join(self.pwd, names[0])
             else:
-                p1 = os.path.join(self.pwd, p + '.if')
+                p1 = os.path.join(self.pwd, names[0] + '.if')
             if os.path.exists(p1):
-                # print(p1)
-                retval = retval + self.loadExecuteFile(p1, p, rank) + '\n'
+                retval = retval + self.loadExecuteFile(p1, names[0], rank) + '\n'
         self.refreshUIList()
         return retval
 
@@ -145,7 +163,7 @@ class OS:
     def addProcessToReadyList(self, pcb, rank=10):
         # self.PCBNUMS = self.PCBNUMS + 1
         l = len(self.readPCB)
-        if l <= rank:
+        if l <= int(rank):
             for i in range(l, rank + 1):
                 self.readPCB.append([])
         self.readPCB[rank].append(pcb)
@@ -172,6 +190,12 @@ class OS:
     # 创建 idle 进程
     def powerOnInitFunc(self):
         print('init ready list')
+        self.pid = 1
+        self.clk = 0
+        self.level = 0
+        self.currentList.clear()
+        self.pwd = os.getcwd()
+        self.waitPCBNUMS = 0
         self.initPCBList()
         pcb = PCB.PCB(1, '1_IDLE', 0, 0, 0, 0, 0, 0, 0, ['nop'], 0)
         self.pid = self.pid + 1
