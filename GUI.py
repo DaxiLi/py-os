@@ -48,6 +48,7 @@ class DeskTop:
     ListboxWaitPidList = None
     ListboxWaitWaitTimeList = None
     ListboxWaitProcessNameList = None
+    ListboxWaitLeftWaitTime = None
     ListboxWaitAllTimeList = None
     ListboxWaitWaitReason = None
     ListboxWaitCPUTimeList = None
@@ -102,15 +103,15 @@ class DeskTop:
             self.ListboxWaitProcessNameList.delete(0, 'end')
             self.ListboxWaitWaitTimeList.delete(0, 'end')
             self.ListboxWaitWaitReason.delete(0, 'end')
-            self.ListboxWaitAllTimeList.delete(0, 'end')
+            self.ListboxWaitLeftWaitTime.delete(0, 'end')
             self.ListboxWaitCPUTimeList.delete(0, 'end')
             for val in list_value:
                 self.ListboxWaitPidList.insert('end', val.pid)
                 self.ListboxWaitProcessNameList.insert('end', val.pName)
                 self.ListboxWaitWaitTimeList.insert('end', val.waitTime)
-                self.ListboxWaitWaitReason.insert('end', 'IO')
+                self.ListboxWaitWaitReason.insert('end', val.dev)
                 self.ListboxWaitCPUTimeList.insert(0, val.cpuTime)
-                self.ListboxWaitAllTimeList.insert(0, clk - val.startTime)
+                self.ListboxWaitLeftWaitTime.insert(0, val.leftWaitTime)
         else:
             print('unknow list name ' + str(list_name))
 
@@ -276,15 +277,15 @@ class DeskTop:
         self.ListboxWaitWaitReason = Listbox(l, height=21, width=10)
         self.ListboxWaitWaitReason.pack(side=LEFT)
 
-        l = LabelFrame(rightFrame, text='阻塞时间', height=400, width=int(self.window_width / 8))
+        l = LabelFrame(rightFrame, text='已等待时间', height=400, width=int(self.window_width / 8))
         l.pack(side=LEFT)
         self.ListboxWaitWaitTimeList = Listbox(l, height=21, width=10)
         self.ListboxWaitWaitTimeList.pack(side=LEFT)
 
-        l = LabelFrame(rightFrame, text='总时间', height=400, width=int(self.window_width / 8))
+        l = LabelFrame(rightFrame, text='剩余时间', height=400, width=int(self.window_width / 8))
         l.pack(side=LEFT)
-        self.ListboxWaitAllTimeList = Listbox(l, height=21, width=10)
-        self.ListboxWaitAllTimeList.pack(side=LEFT)
+        self.ListboxWaitLeftWaitTime = Listbox(l, height=21, width=10)
+        self.ListboxWaitLeftWaitTime.pack(side=LEFT)
 
         l = LabelFrame(rightFrame, text='CPU时间', height=400, width=int(self.window_width / 8))
         l.pack(side=LEFT)

@@ -1,8 +1,9 @@
 RA = 1
+IO 3
 RB = 3
 RX = 2
 INC RA
-IO 5
+IO 5 printer
 INC RB
 INC RX
 SUB RA,RB

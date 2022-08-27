@@ -10,9 +10,11 @@ class PCB:
     PSW = 0
     startTime = 0
     waitTime = 0
+    leftWaitTime = 0
     allWaitTime = 0
     cpuTime = 0
     instruments = []
+    dev = 'I/O'
     rank = 10
     # 由于没有内存， 载入时将指令存于数组之中
 

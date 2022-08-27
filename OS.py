@@ -34,15 +34,19 @@ class OS:
         e = detail[0]
         if e == PSW_ERROR:
             self.UI.addTextToTerminalArea("ERROR: " + detail[1])
+            self.UI.addTextToTerminalArea("Warning: [ ERROR ] pid: {pid} 异常结束！\n".format(pid=self.currentPCB.pid))
+            return self.interupt((PSW_NEXT,))
         elif e == PSW_END:
             self.UI.addTextToTerminalArea("INFO: \t[ END ]      \t " + self.currentPCB.pName + " 运行结束!\n")
             self.interupt((PSW_NEXT,))
             return
         elif e == PSW_IO:
             print('----------------')
-            self.UI.addTextToTerminalArea("INFO: \t[ IO ]      \t pid/ " + str(self.currentPCB.pid) + "需耗时" + str(detail[1]) + "\n" )
+            self.UI.addTextToTerminalArea("INFO: \t[ IO ] Device: " + str(detail[2]) + " pid/ " + str(self.currentPCB.pid) + "需耗时" + str(detail[1]) + "\n" )
             self.cpu.save(self.currentPCB)
-            self.currentPCB.waitTime = int(detail[1])
+            self.currentPCB.dev = detail[2]
+            self.currentPCB.leftWaitTime = int(detail[1])
+            self.currentPCB.waitTime = 0
             self.addProcessToWaitList(self.currentPCB, self.currentPCB.rank)
             self.interupt((PSW_NEXT,))
             return
@@ -277,14 +281,23 @@ class OS:
             self.refreshUIList()
             self.refreshStatus(t + 1)
             # 把 wait 队列中的 PCB ，等待时间 -1 ，减到0，移出等待队列
+            devices = []
             for l in self.waitPCB:
                 for v in l:
-                    if v.waitTime == 0:
+                    # 剩余时间 为 0 则移除队列
+                    if v.leftWaitTime <= 0:
                         self.addProcessToReadyList(v)
                         l.remove(v)
                         return
-                    v.waitTime = v.waitTime - 1
+                    # 已等待时间 +1
+                    v.waitTime = v.waitTime + 1
+                    # 总 io 时间 +1
                     v.allWaitTime = v.allWaitTime + 1
+                    if v.dev in devices:
+                        continue
+                    devices.append(v.dev)
+                    # 剩余时间 -1
+                    v.leftWaitTime = v.leftWaitTime - 1
             time.sleep(CLOCK_CIRCLE)
 
     def run(self):

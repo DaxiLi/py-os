@@ -26,6 +26,10 @@ REGISTERS = {
     'ra', 'rb', 'rx', 'psw', 'pc'
 }
 
+DEVICES = {
+    'dev1', 'dev2', 'dev3', 'printer', 'net', 'I/O'
+}
+
 class CPU:
     PC = 0
     RA = 0
@@ -159,18 +163,21 @@ class CPU:
 
     def io(self, ins):
         print('io')
-        if ins is None or len(ins) < 2:
-            self.interruptFunc((PSW_ERROR, 'Wrong Instrument!'))
+        l = len(ins)
+        if ins is None or l < 2:
+            self.interruptFunc((PSW_ERROR, 'Wrong Instrument! \n\t'.join(ins)) + "\n")
             return
+        if l < 3:
+            dev = 'I/O'
+        else:
+            dev = ins[2]
         if re.match('^[0-9]*$', ins[1]) is None:
-            return self.interruptFunc((PSW_ERROR, 'Ubknow Register!\ninstrument:' + ins[1]))
+            return self.interruptFunc((PSW_ERROR, 'Ubknow IO Time!\n\t Time:' + str(dev) + "\n"))
+        t = int(ins[1])
+        if dev not in DEVICES:
+            return self.interruptFunc((PSW_ERROR, 'Ubknow Device! [ ' + str(dev) + ' ]\n'))
         self.PC = self.PC + 1
-        print(ins)
-        print(self.setPSW(PSW_IO))
-        print(PSW_IO)
-        # self.interruptFunc((PSW_ERROR, 'Ubknow Register!\ninstrument:' + ins[1]))
-        self.interruptFunc((PSW_IO, ins[1]))
-
+        self.interruptFunc((PSW_IO, t, dev))
 
     def end(self, ins):
         print('end')
