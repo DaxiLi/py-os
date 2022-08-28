@@ -230,7 +230,6 @@ class OS:
         if d_cmd[0] == 'cls':
             self.UI.clearTextTerminalArea()
             return
-
         if d_cmd[0].endswith('.if'):
             arg = 10
             if (len(d_cmd) > 1):
@@ -245,7 +244,6 @@ class OS:
             p = os.path.join(self.pwd, d_cmd[0], arg)
             if os.path.exists(p):
                 return self.loadBatFile(p, d_cmd[0], arg)
-
         p = os.path.join(self.pwd, d_cmd[0] + '.if')
         arg = 10
         if (len(d_cmd) > 1):
@@ -293,7 +291,7 @@ class OS:
                     # 已等待时间 +1
                     v.waitTime = v.waitTime + 1
                     # 总 io 时间 +1
-                    v.allWaitTime = v.allWaitTime + 1
+                    v.allWaitTime = v.allWaitTime + 1 
                     if v.dev in devices:
                         continue
                     devices.append(v.dev)
